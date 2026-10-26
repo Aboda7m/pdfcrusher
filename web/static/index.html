@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ضغط ملفات PDF</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#fff; --text:#1c2333; --muted:#667085; --line:#d9deea;
+    --brand:#3b5bdb; --brand-d:#2f49b4; --ok:#1a7f4b; --warn:#9a6700; --warn-bg:#fff8e1; --err:#b42318; --err-bg:#fdecea;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0f1420; --card:#171d2c; --text:#eef1f8; --muted:#9aa4bb; --line:#2b3350;
+      --brand:#6f8cff; --brand-d:#5a77ee; --ok:#4cc38a; --warn:#f0b64a; --warn-bg:#2c2412; --err:#ff8a80; --err-bg:#2e1715; }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  main{width:100%;max-width:520px}
+  h1{font-size:1.6rem;margin:0 0 6px;text-align:center}
+  .sub{color:var(--muted);text-align:center;margin:0 0 22px;line-height:1.7}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;
+    box-shadow:0 8px 28px rgba(20,30,60,.08)}
+  .drop{display:block;border:2px dashed var(--line);border-radius:14px;padding:38px 16px;text-align:center;
+    cursor:pointer;transition:.15s;color:var(--muted)}
+  .drop:hover,.drop.over{border-color:var(--brand);background:rgba(59,91,219,.06);color:var(--text)}
+  .drop strong{display:block;font-size:1.1rem;color:var(--text);margin-bottom:6px}
+  .drop input{display:none}
+  .state{text-align:center}
+  .name{font-weight:600;word-break:break-word;margin-bottom:14px;direction:auto}
+  .bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:14px 0 10px}
+  .bar>i{display:block;height:100%;width:0;background:var(--brand);transition:width .2s}
+  .bar.busy>i{width:40%;animation:slide 1.3s ease-in-out infinite alternate}
+  @keyframes slide{from{margin-inline-start:0}to{margin-inline-start:60%}}
+  .msg{line-height:1.8;margin:8px 0}
+  .box{border-radius:12px;padding:12px 14px;margin:12px 0;line-height:1.8;text-align:start}
+  .box.warn{background:var(--warn-bg);color:var(--warn)}
+  .box.err{background:var(--err-bg);color:var(--err)}
+  .sizes{color:var(--muted);margin:6px 0 14px}
+  .btn{display:inline-block;border:0;border-radius:12px;padding:13px 26px;font-size:1.05rem;font-family:inherit;
+    background:var(--brand);color:#fff;cursor:pointer;text-decoration:none}
+  .btn:hover{background:var(--brand-d)}
+  .btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line);margin-inline-start:8px}
+  .actions{margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>ضغط ملفات PDF</h1>
+  <p class="sub">اختر ملف PDF وسنحاول ضغطه تلقائياً إلى أقل من 499KB.</p>
+
+  <section class="card" aria-live="polite">
+    <label class="drop" id="drop">
+      <strong>اختر ملف PDF أو اسحبه هنا</strong>
+      <span>يبدأ الضغط تلقائياً بعد الاختيار</span>
+      <input type="file" id="file" accept="application/pdf,.pdf">
+    </label>
+
+    <div class="state" id="work" hidden>
+      <div class="name" id="fname"></div>
+      <div class="bar" id="bar"><i id="fill"></i></div>
+      <div class="msg" id="status"></div>
+    </div>
+
+    <div class="state" id="result" hidden>
+      <div class="name" id="rname"></div>
+      <div class="box warn" id="warn" hidden></div>
+      <div class="sizes" id="sizes"></div>
+      <div class="actions">
+        <a class="btn" id="dl" href="#">تحميل الملف</a>
+        <button class="btn ghost" type="button" id="again1">ضغط ملف آخر</button>
+      </div>
+    </div>
+
+    <div class="state" id="fail" hidden>
+      <div class="box err" id="errmsg"></div>
+      <div class="actions">
+        <button class="btn" type="button" id="retry">حاول مجدداً</button>
+        <button class="btn ghost" type="button" id="again2">اختيار ملف آخر</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const MAX = 60 * 1024 * 1024;
+  const $ = id => document.getElementById(id);
+  const input = $('file'), drop = $('drop');
+  let current = null, pollTimer = null, xhr = null;
+
+  const show = which => {
+    for (const id of ['drop','work','result','fail']) $(id).hidden = id !== which;
+  };
+  const fmt = n => n == null ? '' :
+    n >= 1048576 ? (n/1048576).toFixed(2) + ' م.ب' : Math.max(1, Math.round(n/1024)) + ' ك.ب';
+
+  function fail(text){
+    clearTimeout(pollTimer);
+    $('errmsg').textContent = text;
+    show('fail');
+  }
+  function reset(){
+    clearTimeout(pollTimer); if (xhr) xhr.abort();
+    current = null; input.value = ''; show('drop');
+  }
+  function setStatus(text, pct){
+    $('status').textContent = text;
+    const bar = $('bar');
+    if (pct == null){ bar.classList.add('busy'); }
+    else { bar.classList.remove('busy'); $('fill').style.width = pct + '%'; }
+  }
+
+  function start(file){
+    if (!file) return;
+    if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf'){
+      current = null; return fail('الرجاء اختيار ملف بصيغة PDF.');
+    }
+    if (file.size > MAX){ current = null; return fail('حجم الملف أكبر من الحد المسموح (60 ميغابايت).'); }
+    current = file;
+    $('fname').textContent = file.name;
+    show('work'); setStatus('جاري رفع الملف… 0%', 0);
+
+    const fd = new FormData(); fd.append('file', file);
+    xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/jobs');
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable){
+        const p = Math.round(e.loaded / e.total * 100);
+        setStatus('جاري رفع الملف… ' + p + '%', p);
+      }
+    };
+    xhr.upload.onload = () => setStatus('جاري تجهيز الملف…', null);
+    xhr.onerror = () => fail('تعذر الاتصال بالخدمة. تحقق من الاتصال ثم حاول مجدداً.');
+    xhr.onload = () => {
+      let data = {};
+      try { data = JSON.parse(xhr.responseText); } catch(_){}
+      if (xhr.status === 202 && data.id){ poll(data.id, file); }
+      else fail(data.error || 'تعذر رفع الملف. حاول مجدداً.');
+    };
+    xhr.send(fd);
+  }
+
+  function poll(id, file){
+    const tick = async () => {
+      try {
+        const r = await fetch('/api/jobs/' + encodeURIComponent(id), {cache:'no-store'});
+        const s = await r.json();
+        if (s.status === 'queued') setStatus('الملف في قائمة الانتظار…', null);
+        else if (s.status === 'compressing') setStatus('جاري الضغط… قد يستغرق ذلك دقيقة أو أكثر', null);
+        else if (s.status === 'finalizing') setStatus('جاري تجهيز الملف…', null);
+        else if (s.status === 'done' || s.status === 'done_warning'){
+          $('rname').textContent = file.name;
+          $('dl').href = '/api/jobs/' + encodeURIComponent(id) + '/download';
+          $('sizes').textContent = 'الحجم قبل: ' + fmt(s.orig_size) + '  ←  بعد: ' + fmt(s.out_size);
+          const w = $('warn');
+          if (s.status === 'done_warning'){ w.textContent = s.message; w.hidden = false; } else w.hidden = true;
+          show('result'); return;
+        }
+        else if (s.status === 'error'){ return fail(s.message || 'حدث خطأ أثناء المعالجة.'); }
+      } catch(_){ /* انقطاع مؤقت: نكمل المحاولة */ }
+      pollTimer = setTimeout(tick, 1500);
+    };
+    tick();
+  }
+
+  input.addEventListener('change', () => start(input.files[0]));
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => start(e.dataTransfer.files[0]));
+  $('retry').addEventListener('click', () => current ? start(current) : reset());
+  $('again1').addEventListener('click', reset);
+  $('again2').addEventListener('click', reset);
+})();
+</script>
+</body>
+</html>
