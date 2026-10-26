@@ -3,79 +3,75 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="author" content="Abdulrahman Alnotefi">
 <title>ضغط ملفات PDF</title>
-<style>
-  :root{
-    --bg:#f4f6fb; --card:#fff; --text:#1c2333; --muted:#667085; --line:#d9deea;
-    --brand:#3b5bdb; --brand-d:#2f49b4; --ok:#1a7f4b; --warn:#9a6700; --warn-bg:#fff8e1; --err:#b42318; --err-bg:#fdecea;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0f1420; --card:#171d2c; --text:#eef1f8; --muted:#9aa4bb; --line:#2b3350;
-      --brand:#6f8cff; --brand-d:#5a77ee; --ok:#4cc38a; --warn:#f0b64a; --warn-bg:#2c2412; --err:#ff8a80; --err-bg:#2e1715; }
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;min-height:100%}
-  body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);
-    display:flex;align-items:center;justify-content:center;padding:20px}
-  main{width:100%;max-width:520px}
-  h1{font-size:1.6rem;margin:0 0 6px;text-align:center}
-  .sub{color:var(--muted);text-align:center;margin:0 0 22px;line-height:1.7}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;
-    box-shadow:0 8px 28px rgba(20,30,60,.08)}
-  .drop{display:block;border:2px dashed var(--line);border-radius:14px;padding:38px 16px;text-align:center;
-    cursor:pointer;transition:.15s;color:var(--muted)}
-  .drop:hover,.drop.over{border-color:var(--brand);background:rgba(59,91,219,.06);color:var(--text)}
-  .drop strong{display:block;font-size:1.1rem;color:var(--text);margin-bottom:6px}
-  .drop input{display:none}
-  .state{text-align:center}
-  .name{font-weight:600;word-break:break-word;margin-bottom:14px;direction:auto}
-  .bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:14px 0 10px}
-  .bar>i{display:block;height:100%;width:0;background:var(--brand);transition:width .2s}
-  .bar.busy>i{width:40%;animation:slide 1.3s ease-in-out infinite alternate}
-  @keyframes slide{from{margin-inline-start:0}to{margin-inline-start:60%}}
-  .msg{line-height:1.8;margin:8px 0}
-  .box{border-radius:12px;padding:12px 14px;margin:12px 0;line-height:1.8;text-align:start}
-  .box.warn{background:var(--warn-bg);color:var(--warn)}
-  .box.err{background:var(--err-bg);color:var(--err)}
-  .sizes{color:var(--muted);margin:6px 0 14px}
-  .btn{display:inline-block;border:0;border-radius:12px;padding:13px 26px;font-size:1.05rem;font-family:inherit;
-    background:var(--brand);color:#fff;cursor:pointer;text-decoration:none}
-  .btn:hover{background:var(--brand-d)}
-  .btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line);margin-inline-start:8px}
-  .actions{margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-  [hidden]{display:none!important}
-</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232b49c7'/%3E%3Cpath d='M16 7v13M10.5 14.5 16 20l5.5-5.5M9 25h14' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<main>
-  <h1>ضغط ملفات PDF</h1>
-  <p class="sub">اختر ملف PDF وسنحاول ضغطه تلقائياً إلى أقل من 499KB.</p>
+<main class="page">
+  <header class="intro">
+    <h1>ضغط ملفات PDF</h1>
+    <p>اختر ملف PDF وسنحاول ضغطه تلقائياً إلى أقل من 499KB.</p>
+  </header>
 
-  <section class="card" aria-live="polite">
+  <section class="card" aria-label="أداة ضغط PDF">
+    <noscript>
+      <div class="box err">يتطلب هذا التطبيق تفعيل JavaScript في المتصفح.</div>
+    </noscript>
+
     <label class="drop" id="drop">
-      <strong>اختر ملف PDF أو اسحبه هنا</strong>
-      <span>يبدأ الضغط تلقائياً بعد الاختيار</span>
-      <input type="file" id="file" accept="application/pdf,.pdf">
+      <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+      <span class="drop-title">اختر ملف PDF أو اسحبه هنا</span>
+      <span class="drop-hint" id="drop-hint">يبدأ الضغط تلقائياً بعد الاختيار</span>
+      <span class="drop-cta" aria-hidden="true">اختيار ملف</span>
+      <span class="drop-limits">ملفات PDF فقط · حتى 60 ميغابايت</span>
+      <input type="file" id="file" accept="application/pdf,.pdf" aria-describedby="drop-hint">
     </label>
 
-    <div class="state" id="work" hidden>
-      <div class="name" id="fname"></div>
-      <div class="bar" id="bar"><i id="fill"></i></div>
-      <div class="msg" id="status"></div>
+    <div class="state" id="work" tabindex="-1" hidden>
+      <div class="file-row">
+        <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+        <div class="file-meta">
+          <div class="name" id="fname"></div>
+          <div class="file-size" id="fsize"></div>
+        </div>
+      </div>
+      <div class="bar" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-labelledby="status"><i id="fill"></i></div>
+      <p class="msg" id="status" role="status"></p>
     </div>
 
-    <div class="state" id="result" hidden>
+    <div class="state result" id="result" hidden>
+      <div class="result-head">
+        <svg class="result-icon ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>
+        <svg class="result-icon attn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.5v.01"/></svg>
+        <h2 class="result-title">الملف جاهز للتحميل</h2>
+      </div>
       <div class="name" id="rname"></div>
-      <div class="box warn" id="warn" hidden></div>
-      <div class="sizes" id="sizes"></div>
+      <div class="box warn" id="warn" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.5v.01"/></svg>
+        <span id="warntext"></span>
+      </div>
+      <dl class="stats">
+        <div class="stat"><dt>الحجم قبل</dt><dd id="sBefore"></dd></div>
+        <div class="stat after"><dt>الحجم بعد</dt><dd id="sAfter"></dd></div>
+        <div class="stat"><dt>نسبة التوفير</dt><dd id="sSaved"></dd></div>
+      </dl>
       <div class="actions">
-        <a class="btn" id="dl" href="#">تحميل الملف</a>
+        <a class="btn" id="dl" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+          تحميل الملف
+        </a>
         <button class="btn ghost" type="button" id="again1">ضغط ملف آخر</button>
       </div>
     </div>
 
     <div class="state" id="fail" hidden>
-      <div class="box err" id="errmsg"></div>
+      <div class="box err" id="errbox" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>
+        <span id="errmsg"></span>
+      </div>
       <div class="actions">
         <button class="btn" type="button" id="retry">حاول مجدداً</button>
         <button class="btn ghost" type="button" id="again2">اختيار ملف آخر</button>
@@ -83,6 +79,10 @@
     </div>
   </section>
 </main>
+
+<footer class="site-footer">
+  <p dir="ltr" lang="en">Developed by Abdulrahman Alnotefi · <a href="https://github.com/Aboda7m/pdfcrusher" target="_blank" rel="noopener noreferrer" aria-label="Aboda7m, PDF Crusher on GitHub (opens in a new tab)">Aboda7m</a></p>
+</footer>
 
 <script>
 (() => {
@@ -94,6 +94,7 @@
   const show = which => {
     for (const id of ['drop','work','result','fail']) $(id).hidden = id !== which;
   };
+  const focusEl = el => { try { el.focus({ preventScroll: true }); } catch (_) {} };
   const fmt = n => n == null ? '' :
     n >= 1048576 ? (n/1048576).toFixed(2) + ' م.ب' : Math.max(1, Math.round(n/1024)) + ' ك.ب';
 
@@ -101,16 +102,18 @@
     clearTimeout(pollTimer);
     $('errmsg').textContent = text;
     show('fail');
+    focusEl($('retry'));
   }
   function reset(){
     clearTimeout(pollTimer); if (xhr) xhr.abort();
     current = null; input.value = ''; show('drop');
+    focusEl(input);
   }
   function setStatus(text, pct){
     $('status').textContent = text;
     const bar = $('bar');
-    if (pct == null){ bar.classList.add('busy'); }
-    else { bar.classList.remove('busy'); $('fill').style.width = pct + '%'; }
+    if (pct == null){ bar.classList.add('busy'); $('fill').style.width = ''; bar.removeAttribute('aria-valuenow'); }
+    else { bar.classList.remove('busy'); $('fill').style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
   }
 
   function start(file){
@@ -121,7 +124,9 @@
     if (file.size > MAX){ current = null; return fail('حجم الملف أكبر من الحد المسموح (60 ميغابايت).'); }
     current = file;
     $('fname').textContent = file.name;
+    $('fsize').textContent = fmt(file.size);
     show('work'); setStatus('جاري رفع الملف… 0%', 0);
+    focusEl($('work'));
 
     const fd = new FormData(); fd.append('file', file);
     xhr = new XMLHttpRequest();
@@ -154,10 +159,15 @@
         else if (s.status === 'done' || s.status === 'done_warning'){
           $('rname').textContent = file.name;
           $('dl').href = '/api/jobs/' + encodeURIComponent(id) + '/download';
-          $('sizes').textContent = 'الحجم قبل: ' + fmt(s.orig_size) + '  ←  بعد: ' + fmt(s.out_size);
+          $('sBefore').textContent = fmt(s.orig_size);
+          $('sAfter').textContent = fmt(s.out_size);
+          const saved = (s.orig_size > 0 && s.out_size != null)
+            ? Math.round((1 - s.out_size / s.orig_size) * 100) : null;
+          $('sSaved').textContent = (saved != null && saved > 0) ? saved + '%' : '—';
           const w = $('warn');
-          if (s.status === 'done_warning'){ w.textContent = s.message; w.hidden = false; } else w.hidden = true;
-          show('result'); return;
+          if (s.status === 'done_warning'){ $('warntext').textContent = s.message; w.hidden = false; } else w.hidden = true;
+          $('result').classList.toggle('is-warn', s.status === 'done_warning');
+          show('result'); focusEl($('dl')); return;
         }
         else if (s.status === 'error'){ return fail(s.message || 'حدث خطأ أثناء المعالجة.'); }
       } catch(_){ /* انقطاع مؤقت: نكمل المحاولة */ }

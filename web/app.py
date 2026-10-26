@@ -40,7 +40,7 @@ MSG_BUSY = "الخدمة مشغولة حالياً. حاول بعد قليل."
 MSG_NOT_PDF = "الملف المرفوع ليس ملف PDF صالحاً."
 MSG_TOO_BIG = "حجم الملف أكبر من الحد المسموح (60 ميغابايت)."
 
-app = Flask(__name__, static_folder=None)
+app = Flask(__name__, static_folder=str(BASE / "static"), static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD + 1024 * 1024
 
 _lock = threading.Lock()

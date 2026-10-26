@@ -55,7 +55,8 @@ pdfcrusher/
     ├── requirements.txt
     ├── run.bat
     ├── static/
-    │   └── index.html
+    │   ├── index.html
+    │   └── style.css
     └── jobs/               # Runtime data; not committed
 ```
 

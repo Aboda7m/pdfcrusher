@@ -1,0 +1,523 @@
+/* PDF Crusher — web interface styles (RTL-first, no external assets) */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f2f4f8;
+  --text: #1b2230;
+  --muted: #586174;
+  --line: #dde1ea;
+  --line-strong: #bfc7d6;
+
+  --brand: #2b49c7;
+  --brand-hover: #243da8;
+  --on-brand: #ffffff;
+  --brand-soft: rgba(43, 73, 199, 0.07);
+
+  --ok: #157a3d;
+  --ok-soft: #e8f5ed;
+  --warn-bg: #fff6df;
+  --warn-text: #6a4300;
+  --warn-line: #efd79b;
+  --err-bg: #fdeceb;
+  --err-text: #9b1c12;
+  --err-line: #f1bdb8;
+
+  --focus: #2b49c7;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 24px rgba(16, 24, 40, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d111a;
+    --surface: #151b27;
+    --surface-2: #1b2231;
+    --text: #e9edf5;
+    --muted: #a0aabd;
+    --line: #273044;
+    --line-strong: #3a455d;
+
+    --brand: #7f9bff;
+    --brand-hover: #9bb1ff;
+    --on-brand: #0b1020;
+    --brand-soft: rgba(127, 155, 255, 0.1);
+
+    --ok: #5fd18b;
+    --ok-soft: #14261c;
+    --warn-bg: #2a2111;
+    --warn-text: #f2c76b;
+    --warn-line: #4a3a18;
+    --err-bg: #2c1614;
+    --err-text: #ff9b92;
+    --err-line: #522724;
+
+    --focus: #9bb1ff;
+    --shadow: none;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+svg {
+  display: block;
+  flex: none;
+}
+
+/* ---------- Layout ---------- */
+
+.page {
+  flex: 1;
+  width: min(100% - 32px, 560px);
+  margin-inline: auto;
+  padding-block: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.intro {
+  text-align: center;
+  margin-block-end: 24px;
+}
+
+.intro h1 {
+  margin: 0 0 6px;
+  font-size: clamp(1.35rem, 1.15rem + 0.9vw, 1.65rem);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.intro p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.975rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+/* ---------- Focus ---------- */
+
+:where(a, button):focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.state:focus {
+  outline: none; /* programmatic focus target only */
+}
+
+/* ---------- Upload area ---------- */
+
+.drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 32px 20px 28px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 12px;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.drop:hover,
+.drop.over {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+/* The native input stays focusable but visually hidden */
+.drop input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.drop:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Hide the ring for mouse users where :has() is supported; otherwise the ring above stays */
+.drop:focus-within:not(:has(input:focus-visible)) {
+  outline: none;
+}
+
+.drop-icon {
+  inline-size: 40px;
+  block-size: 40px;
+  color: var(--brand);
+  margin-block-end: 6px;
+}
+
+.drop-title {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.drop-hint {
+  font-size: 0.925rem;
+}
+
+.drop-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 46px;
+  margin-block-start: 14px;
+  padding-inline: 26px;
+  border-radius: 10px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.15s;
+}
+
+.drop:hover .drop-cta {
+  background: var(--brand-hover);
+}
+
+.drop-limits {
+  margin-block-start: 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---------- Shared state blocks ---------- */
+
+.state {
+  display: block;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-align: start;
+}
+
+.file-icon {
+  inline-size: 28px;
+  block-size: 28px;
+  color: var(--brand);
+}
+
+.file-meta {
+  min-inline-size: 0;
+  flex: 1;
+}
+
+.name {
+  font-weight: 600;
+  line-height: 1.5;
+  unicode-bidi: plaintext;      /* Latin or Arabic file names each render in their own direction */
+  text-align: right;            /* the page is RTL; match-parent keeps it aligned to the parent's start */
+  text-align: match-parent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+/* ---------- Progress ---------- */
+
+.bar {
+  block-size: 8px;
+  margin-block: 18px 12px;
+  border-radius: 99px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.bar > i {
+  display: block;
+  block-size: 100%;
+  inline-size: 0;
+  border-radius: inherit;
+  background: var(--brand);
+  transition: inline-size 0.2s;
+}
+
+.bar.busy > i {
+  inline-size: 38%;
+  animation: slide 1.3s ease-in-out infinite alternate;
+}
+
+@keyframes slide {
+  from { margin-inline-start: 0; }
+  to { margin-inline-start: 62%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar.busy > i {
+    animation: none;
+    inline-size: 100%;
+    opacity: 0.45;
+  }
+  .bar > i,
+  .drop,
+  .drop-cta,
+  .btn {
+    transition: none;
+  }
+}
+
+.msg {
+  margin: 0;
+  text-align: center;
+  font-size: 0.975rem;
+}
+
+/* ---------- Result ---------- */
+
+.result-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 14px;
+}
+
+.result-icon {
+  inline-size: 28px;
+  block-size: 28px;
+}
+
+.result-icon.ok { color: var(--ok); }
+.result-icon.attn { color: var(--warn-text); display: none; }
+.is-warn .result-icon.ok { display: none; }
+.is-warn .result-icon.attn { display: block; }
+
+.result-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.result .name {
+  margin-block-end: 14px;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.925rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+.stat {
+  padding: 12px 10px;
+  text-align: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.stat dt {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.stat dd {
+  margin: 2px 0 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.stat.after dd {
+  color: var(--ok);
+}
+
+/* ---------- Messages ---------- */
+
+.box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  text-align: start;
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+.box svg {
+  inline-size: 22px;
+  block-size: 22px;
+  margin-block-start: 3px;
+}
+
+.box.warn {
+  background: var(--warn-bg);
+  border-color: var(--warn-line);
+  color: var(--warn-text);
+}
+
+.box.err {
+  background: var(--err-bg);
+  border-color: var(--err-line);
+  color: var(--err-text);
+}
+
+/* ---------- Buttons ---------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 46px;
+  padding: 10px 24px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.btn svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.btn:hover {
+  background: var(--brand-hover);
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--brand);
+  border-color: var(--line-strong);
+}
+
+.btn.ghost:hover {
+  background: var(--brand-soft);
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  padding: 16px 16px 22px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.site-footer a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.site-footer a:hover {
+  color: var(--text);
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 480px) {
+  .page {
+    width: min(100% - 24px, 560px);
+    padding-block: 24px 16px;
+    justify-content: flex-start;
+  }
+  .card { padding: 14px; }
+  .drop { padding: 26px 14px 22px; }
+  .actions { flex-direction: column; }
+  .actions .btn { inline-size: 100%; }
+}
+
+@media (max-width: 400px) {
+  .stats { grid-template-columns: 1fr; gap: 8px; }
+  .stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+  }
+  .stat dd { margin: 0; }
+}
+
+/* Windows high contrast / forced colors */
+@media (forced-colors: active) {
+  .drop,
+  .card,
+  .stat,
+  .box { border-color: CanvasText; }
+  .bar > i { background: Highlight; }
+}
